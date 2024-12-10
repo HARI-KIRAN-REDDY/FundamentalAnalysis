@@ -9,6 +9,10 @@ def generate_cashflow_report(stock_code):
     financing_details = data_getter.get_financing_details()
     overall_details = data_getter.get_overall_details()
 
+    # Deletes existing data file before apending new data
+    with open(f'html_files/{overall_details["company_code"]}_cashflow.html', 'w', encoding='utf-8') as report:
+    report.write('')
+
     # Generate graphs
     CashflowGraphGenerator(operating_details).plot_data()
     CashflowGraphGenerator(investment_details).plot_data()
