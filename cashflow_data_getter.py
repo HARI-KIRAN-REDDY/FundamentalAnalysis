@@ -10,7 +10,8 @@ class CashflowDataGetter:
         self.stock_code = stock_code
         options = Options()
         options.headless = True  # Run in headless mode
-        self.driver = webdriver.Chrome(executable_path=ChromeDriverManager().install(), options=options)
+        self.driver = Chrome(executable_path=ChromeDriverManager().install(), options=options)
+        
         self.driver.get(f'https://www.screener.in/company/{stock_code}/consolidated/')
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
