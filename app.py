@@ -16,4 +16,5 @@ def generate():
     return f"<a href='/static/{html_path}' target='_blank'>View Report</a>"  # Provide download link
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
+    
