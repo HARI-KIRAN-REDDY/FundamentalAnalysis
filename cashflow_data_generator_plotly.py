@@ -15,7 +15,7 @@ class CashflowGraphGenerator:
     def add_to_html(self, fig):
         pio.write_html(fig, file=f"temp.html", auto_open=False)
         with open('temp.html', 'r', encoding='utf-8') as temp_file:
-            with open(f'html_files/{self.company_code}_cashflow.html', 'a', encoding='utf-8') as report:
+            with open(f'static/html_files/{self.company_code}_cashflow.html', 'a', encoding='utf-8') as report:
                 report.write(temp_file.read())
 
 
