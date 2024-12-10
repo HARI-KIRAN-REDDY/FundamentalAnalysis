@@ -1,17 +1,21 @@
 import time
 
 from selenium.webdriver import Chrome
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service  # Import the Service class
 
 class CashflowDataGetter:
     def __init__(self, stock_code):
         self.stock_code = stock_code
         options = Options()
         options.headless = True  # Run in headless mode
-        self.driver = Chrome(executable_path=ChromeDriverManager().install(), options=options)
         
+        # Initialize the Service with the path to ChromeDriver
+        service = Service(ChromeDriverManager().install())
+        
+        # Now pass the service and options to the Chrome WebDriver
+        self.driver = Chrome(service=service, options=options)
         self.driver.get(f'https://www.screener.in/company/{stock_code}/consolidated/')
         self.driver.maximize_window()
         self.driver.implicitly_wait(5)
