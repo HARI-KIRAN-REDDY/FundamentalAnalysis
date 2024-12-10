@@ -11,7 +11,7 @@ def generate_cashflow_report(stock_code):
 
     # Deletes existing data file before apending new data
     with open(f'html_files/{overall_details["company_code"]}_cashflow.html', 'w', encoding='utf-8') as report:
-    report.write('')
+        report.write('')
 
     # Generate graphs
     CashflowGraphGenerator(operating_details).plot_data()
