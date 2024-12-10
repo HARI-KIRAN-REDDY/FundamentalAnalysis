@@ -70,6 +70,7 @@ class CashflowDataGetter:
                 self.get_net_cashflow_from_type(f'Cash from {item} Activity'))
         details['years'] = self.get_years()
         details['net cashflow'] = self.get_net_cashflow()
+        self.driver.quit()
         return details
 
 
