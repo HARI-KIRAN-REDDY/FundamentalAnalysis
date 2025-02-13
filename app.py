@@ -23,7 +23,7 @@ def get_suggestions():
 
 @app.route('/')
 def home():
-    return render_template('templates/index.html')
+    return render_template('index.html')
 
 @app.route('/data')
 def display_data():
@@ -35,3 +35,4 @@ def display_data():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
+
