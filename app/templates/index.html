@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Klick{% endblock %}
+
+{% block content %}
+    <h1 class="text-5xl font-bold mb-4">Klick</h1>
+    <p class="text-lg mb-8">Plan. Invest. Prosper.</p>
+    
+    <!-- Search Box -->
+    <div class="w-full max-w-md">
+        {% include "forms/_search_form.html" %}
+    </div>
+{% endblock %}

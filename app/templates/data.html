@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <!-- Navigation & Search -->
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-white">Klick Stock Insights</h1>
+        {% include "forms/_search_form.html" %}
+    </div>
+
+    {% if data %}
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        <!-- Company Overview -->
+        <div class="mb-6 border-b pb-4">
+            <h2 class="text-2xl font-semibold text-gray-800">{{ data['Company Details']['longName'] }}</h2>
+            <p class="text-gray-600">{{ data['Company Details']['longBusinessSummary'] }}</p>
+            <p class="text-gray-500"><b>Sector: {{ data['Company Details']['sector'] }} | Industry: {{ data['Company Details']['industry'] }}</b></p>
+            <a href="{{ data['Company Details']['website'] }}" target="_blank" class="text-blue-500 underline">Visit Website</a>
+        </div>
+
+        <!-- Stock Overview Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            {% for category, details in data.items() if category != 'Company Details' %}
+            <div class="bg-gray-100 p-4 rounded-lg">
+                <h3 class="text-lg font-bold text-gray-700">{{ category }}</h3>
+                <div class="grid grid-cols-2 gap-2 text-gray-600">
+                    {% for key, value in details.items() %}
+                    <div class="p-2 bg-white shadow rounded-lg">
+                        <span class="font-semibold">{{ key }}:</span> {{ value }}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+        <p class="text-gray-600 text-center mt-4">No stock data available. Try searching for a stock symbol.</p>
+    {% endif %}
+</div>
+{% endblock %}

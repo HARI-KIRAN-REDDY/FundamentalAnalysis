@@ -1,0 +1,46 @@
+<form action="{{ url_for('display_data') }}" method="get" class="w-full max-w-md relative flex items-center">
+            <input type="text" id="search-box" name="query" placeholder="Search stocks, markets..."
+                class="w-full px-4 py-3 text-gray-900 rounded-lg focus:outline-none shadow-md" autocomplete="off">
+            <div id="suggestions" class="absolute bg-white border border-gray-300 w-full mt-1 rounded-lg shadow-md hidden"></div>
+            <button type="submit" class="ml-2 p-3 bg-blue-600 text-white rounded-lg flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1111.293 3.293l4.147 4.147a1 1 0 11-1.414 1.414l-4.147-4.147A6 6 0 012 8z" clip-rule="evenodd" />
+                </svg>
+            </button>
+</form>
+
+<script>
+document.getElementById("search-box").addEventListener("input", function() {
+    let query = this.value;
+    let suggestionsDiv = document.getElementById("suggestions");
+
+    if (query.length >= 3) {
+        fetch(`/suggestions?query=${query}`)
+            .then(response => response.json())
+            .then(data => {
+                suggestionsDiv.innerHTML = "";
+                suggestionsDiv.classList.remove("hidden");
+
+                if (data.length === 0) {
+    suggestionsDiv.innerHTML = "<div class='px-4 py-2 text-gray-800 bg-gray-200'>No matches found</div>";
+    return;
+}
+
+
+                data.forEach(item => {
+                    let div = document.createElement("div");
+                    div.innerHTML = `<strong class="text-gray-900">${item.symbol}</strong>
+                                    <span class="text-gray-700">(${item.name})</span>`;
+                    div.classList.add("px-4", "py-2", "cursor-pointer", "bg-gray-100", "hover:bg-blue-100", "rounded-md");
+                    div.onclick = function() {
+                        document.getElementById("search-box").value = item.symbol;
+                        suggestionsDiv.classList.add("hidden");
+                    };
+                    suggestionsDiv.appendChild(div);
+                });
+            });
+    } else {
+        suggestionsDiv.classList.add("hidden");
+    }
+});
+</script>

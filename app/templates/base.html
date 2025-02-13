@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Klick{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-b from-blue-900 to-blue-600 min-h-screen flex flex-col text-white">
+
+    <!-- Navigation -->
+    <nav class="w-full p-4 flex justify-between items-center bg-blue-800">
+        <h1 class="text-3xl font-bold">Klick</h1>
+        <a href="/login" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login</a>
+    </nav>
+
+    <main class="flex-grow flex flex-col items-center justify-center text-center p-6">
+        {% block content %}{% endblock %}
+    </main>
+
+</body>
+</html>
