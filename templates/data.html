@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container mx-auto p-6">
+<div class="container mx-auto p-1">
     <!-- Navigation & Search -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-white text-center md:text-left">Klick Stock Insights</h1>
@@ -11,10 +11,10 @@
     {% if data %}
     <div class="bg-white p-6 rounded-lg shadow-md">
         <!-- Company Overview -->
-        <div class="mb-6 border-b pb-4">
+        <div class="mb-6 border-b pb-1">
             <h2 class="text-2xl font-semibold text-gray-800">{{ data['Company Details']['longName'] }}</h2>
             <p style="color: #6b7280; font-weight: bold; font-size: 16px; padding: 10px; background-color: #f3f4f6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                Sector: {{ data['Company Details']['sector'] }} | Industry: {{ data['Company Details']['industry'] }}
+                Sector: {{ data['Company Details']['sector'] }} <br> Industry: {{ data['Company Details']['industry'] }}
             </p>
             {% include "summary.html" %}
             {% include "buttons/data_sub_website_button.html" %}
