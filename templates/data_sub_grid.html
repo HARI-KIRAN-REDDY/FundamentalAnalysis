@@ -1,0 +1,22 @@
+<!-- Stock Overview Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+    {% for category, details in data.items() if category != 'Company Details' %}
+    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-8 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-500 ease-in-out">
+        <h3 class="text-xl font-bold text-gray-800 mb-6">{{ category }}</h3>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-600">
+            {% for key, value in details.items() %}
+            <div class="p-6 bg-white shadow rounded-xl flex flex-col hover:bg-gray-50 transition-all duration-500 ease-in-out border-l-8 border-blue-400">
+                <div class="flex flex-col justify-between h-full">
+                    <div class="mb-2">
+                        <span class="font-semibold text-gray-800 text-md block">{{ key }}:</span>
+                    </div>
+                    <div>
+                        <span class="text-gray-700 text-md block">{{ value }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>

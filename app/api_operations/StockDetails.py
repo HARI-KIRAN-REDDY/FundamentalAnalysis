@@ -88,7 +88,7 @@ class StockDetails:
             updated_data['Lowest Target Price'] = data.get('targetLowPrice')
             updated_data['Highest Target Price'] = data.get('targetHighPrice')
             updated_data['Average Target Price'] = data.get('targetMeanPrice')
-            updated_data['Median Target Price'] = data.get('targetMeanPrice')
+            updated_data['Median Target Price'] = data.get('targetMedianPrice')
             updated_data['No of Analyst Opinions'] = data.get('numberOfAnalystOpinions')
             updated_data['Recommendation'] = data.get('recommendationKey')
             self.standardized_data['Targets'] = updated_data
