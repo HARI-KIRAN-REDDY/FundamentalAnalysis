@@ -13,10 +13,10 @@ class StockScreens:
 
     @staticmethod
     def get_small_cap_aggressive_stocks():
-        response = yf.screen(ind_aggressive_small_cap).get('quotes')
+        response = yf.screen(ind_aggressive_small_cap, sortField='pegratio_5y').get('quotes')
         return response
 
     @staticmethod
     def get_mid_cap_aggressive_stocks():
-        response = yf.screen(ind_aggressive_mid_cap).get('quotes')
+        response = yf.screen(ind_aggressive_mid_cap, sortField='pegratio_5y').get('quotes')
         return response
