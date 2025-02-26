@@ -1,4 +1,5 @@
 import yfinance as yf
+from app.api_operations.custom_quires import *
 
 class StockDetails:
     def __init__(self, stock_code):
@@ -118,4 +119,25 @@ class StockDetails:
         self.standardized_data['Ratios'] = updated_data
 
 if __name__ == '__main__':
-    print(StockDetails('EIEL.NS').get_standardized_data())
+    # s= StockDetails('GPIL.NS').stock
+    # split_factor = 1
+    # sh = s.history(start='2000-01-01')
+    # sh['Adj Close'] = 0  # Create a new column 'Adj Close' initialized to 0
+    #
+    # for index, row in sh.iterrows():
+    #     if row['Stock Splits'] != 0:
+    #         split_factor *= row['Stock Splits']
+    #         print('SF: ', split_factor)
+    #     sh.at[index, 'Adj Close'] = row['Close'] / split_factor
+    #
+    # print(sh[['Close', 'Stock Splits', 'Adj Close']])
+    # sh.to_csv('stock_data.csv', index=False)
+    # import yfinance as yf
+    # response = yf.screen(indian_aggressive_small_cap)
+    # print(response)
+    pass
+
+
+
+
+

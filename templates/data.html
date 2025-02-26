@@ -11,11 +11,18 @@
     {% if data %}
     <div class="bg-white p-6 rounded-lg shadow-md">
         <!-- Company Overview -->
-        <div class="mb-6 border-b pb-1">
-            <h2 class="text-2xl font-semibold text-gray-800">{{ data['Company Details']['longName'] }}</h2>
-            <p style="color: #6b7280; font-weight: bold; font-size: 16px; padding: 10px; background-color: #f3f4f6; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
-                Sector: {{ data['Company Details']['sector'] }} <br> Industry: {{ data['Company Details']['industry'] }}
-            </p>
+        <div class="mb-10 pb-2">
+            <h2 class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-blue-800 leading-tight shadow-lg animate-pulse">
+                {{ data['Company Details']['longName'] }}
+            </h2>
+            <div class="mt-5 p-6 bg-gradient-to-r from-blue-600 to-blue-900 rounded-xl shadow-xl transition-all hover:shadow-2xl">
+                <p class="text-white text-lg mb-2">
+                    Sector: <span class="font-semibold">{{ data['Company Details']['sector'] }}</span>
+                </p>
+                <p class="text-white text-lg">
+                    Industry: <span class="font-semibold">{{ data['Company Details']['industry'] }}</span>
+                </p>
+            </div>
             {% include "summary.html" %}
             {% include "buttons/data_sub_website_button.html" %}
         </div>

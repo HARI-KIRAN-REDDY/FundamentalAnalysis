@@ -1,0 +1,47 @@
+<!-- Add Tailwind CSS for styling -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
+<!-- screens.html -->
+<div class="container mx-auto px-4 py-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for screen_name, stocks in screens.items() %}
+            <div class="bg-gradient-to-tr from-purple-500 to-pink-500 rounded-lg shadow-lg overflow-hidden transform hover:scale-105 transition duration-500 ease-in-out">
+                <button onclick="openModal('{{ screen_name | replace(' ', '_') | lower }}_modal')" class="w-full h-full p-4 flex flex-col items-center justify-center text-white text-3xl font-bold cursor-pointer" style="height: 200px;">
+                    {{ screen_name }}
+                </button>
+            </div>
+            <!-- Modal -->
+            <div id="{{ screen_name | replace(' ', '_') | lower }}_modal" class="fixed inset-0 bg-black bg-opacity-75 hidden overflow-y-auto z-50">
+                <div class="bg-white p-4 rounded-lg shadow-lg w-full h-full flex flex-col">
+                    <div class="flex justify-between items-center p-4 sticky top-0 bg-white z-50">
+                        <h2 class="text-3xl font-bold text-gray-800">{{ screen_name }}</h2>
+                        <button onclick="closeModal('{{ screen_name | replace(' ', '_') | lower }}_modal')" class="text-gray-800 text-3xl leading-none hover:text-red-600">&times;</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 p-4 overflow-y-auto">
+                        {% for stock in stocks %}
+                            <a href="{{ url_for('display_data', query=stock['symbol']) }}" class="transform hover:scale-110 transition duration-300 ease-in-out bg-gradient-to-r from-green-400 to-blue-500 rounded-lg shadow-lg p-4 flex flex-col justify-between text-white">
+                                <h3 class="text-lg font-bold">{{ stock['longName'] }}</h3>
+                                <p class="text-sm">{{ stock['symbol'] }}</p>
+                                <p class="text-md font-semibold">₹{{ stock['regularMarketPrice'] }}</p>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'flex';
+    document.body.style.overflow = 'hidden'; // Prevent scrolling on the background
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    modal.style.display = 'none';
+    document.body.style.overflow = 'auto'; // Enable scrolling
+}
+</script>
