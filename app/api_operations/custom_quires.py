@@ -35,5 +35,5 @@ ind_value_mid_cap = EquityQuery('AND', [
 
 
 if __name__=='__main__':
-    response = yf.screen(ind_aggressive_mid_cap, sortField='eodvolume')
+    response = yf.screen(ind_aggressive_mid_cap, sortField='pegratio_5y')
     print(response)

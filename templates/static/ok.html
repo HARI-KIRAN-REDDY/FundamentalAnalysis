@@ -1,0 +1,52 @@
+<div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
+    <h3 class="text-xl lg:text-2xl font-bold text-blue-800 mb-4 shadow-md" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); background-color: #e6f7ff; padding: 12px; border-radius: 8px;">
+        Stock Targets
+    </h3>
+    <div id="stock-targets-grid" class="grid grid-cols-2 gap-4 text-white font-bold text-center"></div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let data = [
+            { label: "CMP", value: 702.90 },
+            { label: "Min Target", value: 70.00 },
+            { label: "Avg Target", value: 500.00 },
+            { label: "Max Target", value: 700.00 }
+        ];
+
+        // Sort data by value in ascending order
+        data.sort((a, b) => a.value - b.value);
+
+        // Get min and max values for color scaling
+        let minValue = Math.min(...data.map(item => item.value));
+        let maxValue = Math.max(...data.map(item => item.value));
+        let cmpValue = data.find(item => item.label === "CMP")?.value || 0;
+
+        // Function to generate controlled color shades
+        function getColorShade(value, cmp) {
+            let minIntensity = 200; // Ensuring bright colors
+            let maxIntensity = 300; // Limiting the upper range for visibility
+            let range = maxValue - minValue || 1; // Avoid division by zero
+            let position = (value - minValue) / range;
+            let intensity_red = Math.floor(position * (maxIntensity - minIntensity)) + minIntensity;
+            let intensity_green = 100 - Math.floor(position * (maxIntensity - minIntensity)) + minIntensity;
+
+            return value >= cmp
+                ? `rgb(0, ${intensity_green}, 0)`  // Controlled green shades
+                : `rgb(${intensity_red}, 0, 0)`; // Controlled red shades
+        }
+
+        // Assign dynamic color shades based on CMP
+        data.forEach(item => {
+            item.color = getColorShade(item.value, cmpValue);
+        });
+
+        // Generate the sorted HTML
+        let container = document.querySelector("#stock-targets-grid");
+        container.innerHTML = data.map(item => `
+            <div class="p-4 rounded-lg" style="background-color: ${item.color};">
+                ${item.label}<br>${item.value.toFixed(2)}
+            </div>
+        `).join('');
+    });
+</script>

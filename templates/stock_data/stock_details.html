@@ -1,0 +1,76 @@
+<!-- Stock Details Section -->
+<div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
+    <h3 class="text-xl lg:text-2xl font-bold text-blue-800 mb-4 shadow-md" style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1); background-color: #e6f7ff; padding: 12px; border-radius: 8px;">
+        Stock Overview
+    </h3>
+    <div class="grid grid-cols-1 gap-4">
+        <div class="grid grid-cols-2 gap-4">
+            <div class="infoBox p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-center transition-transform transform hover:scale-105">
+                <div class="infoTitle text-gray-600 text-sm font-medium">% Change from 52-Week Low</div>
+                <div class="infoValue text-2xl font-bold text-blue-600 mt-2" id="changeLow">-</div>
+            </div>
+            <div class="infoBox p-4 bg-white rounded-lg shadow-md flex flex-col items-center text-center transition-transform transform hover:scale-105">
+                <div class="infoTitle text-gray-600 text-sm font-medium">% Change from 52-Week High</div>
+                <div class="infoValue text-2xl font-bold text-blue-600 mt-2" id="changeHigh">-</div>
+            </div>
+        </div>
+        <div id="chartWrapper" class="flex justify-center w-full">
+            <div id="speedometerChart" class="chartContainer w-full max-w-md"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    var cmp = {{ data["Stock price detail"]["Current Price"] }};
+    var low52 = {{ data["Stock price detail"]["52-Week Low"] }};
+    var high52 = {{ data["Stock price detail"]["52-Week High"] }};
+    var prevClose = {{ data["Stock price detail"]["Previous Close"] }};
+
+    // Calculate percentage changes
+    var changeFromHigh = ((cmp - high52) / high52 * 100).toFixed(2);
+    var changeFromLow = ((cmp - low52) / low52 * 100).toFixed(2);
+
+    // Update the HTML content dynamically
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById("changeHigh").textContent = changeFromHigh + "%";
+        document.getElementById("changeLow").textContent = changeFromLow + "%";
+    });
+
+    function plotChart() {
+        var container = document.getElementById("chartWrapper");
+        var width = container.clientWidth * 0.95; // Use 95% of the container width
+        var height = width * 0.6; // Maintain aspect ratio
+
+        var speedometerData = [
+            {
+                type: "indicator",
+                mode: "gauge+number+delta",
+                value: cmp,
+                delta: { reference: parseFloat(prevClose) },
+                gauge: {
+                    axis: { range: [low52, high52] },
+                    bar: { color: "blue" },
+                    steps: [
+                        { range: [low52, (high52 - low52) * 0.33 + low52], color: "#d4e6f1" },
+                        { range: [(high52 - low52) * 0.33 + low52, (high52 - low52) * 0.66 + low52], color: "#a9cce3" },
+                        { range: [(high52 - low52) * 0.66 + low52, high52], color: "#5dade2" }
+                    ],
+                    borderwidth: 1,
+                    bordercolor: "#000"
+                },
+                title: { text: "CMP vs 52-Week Range & Day's Change", font: { size: 18 } },
+                domain: { x: [0, 1], y: [0, 1] }
+            }
+        ];
+
+        Plotly.newPlot('speedometerChart', speedometerData, {
+            width: width,
+            height: height,
+            margin: { t: 60, b: 30, l: 20, r: 20 }
+        }, { responsive: true });
+    }
+
+    window.addEventListener('resize', plotChart);
+    plotChart();
+</script>

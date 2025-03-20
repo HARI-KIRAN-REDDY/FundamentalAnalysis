@@ -1,9 +1,11 @@
-import yfinance as yf
+from flask import jsonify
 from app.api_operations.custom_quires import *
+
 
 class StockDetails:
     def __init__(self, stock_code):
-        self.stock = yf.Ticker(stock_code)
+        self.stock_code = stock_code
+        self.stock = yf.Ticker(self.stock_code)
         self.data = {}
         self.standardized_data = {}
         self.detail_keys = {
@@ -104,13 +106,12 @@ class StockDetails:
         except Exception as e:
             return value
 
-
     def ratios_standardization(self):
         data = self.data.get('Ratios')
         updated_data = {}
         updated_data['Book Value'] = self.__ratio_helper_get_standardized_value(data.get('bookValue'))
         updated_data['Price to Book'] = self.__ratio_helper_get_standardized_value(data.get('priceToBook'))
-        updated_data['Debt to Equity'] = self.__ratio_helper_get_standardized_value(data.get('debtToEquity'))
+        updated_data['Debt to Equity %'] = self.__ratio_helper_get_standardized_value(data.get('debtToEquity'))
         updated_data['Revenue per Share'] = self.__ratio_helper_get_standardized_value(data.get('revenuePerShare'))
         updated_data['Return on Assets'] = self.__ratio_helper_get_standardized_value(data.get('returnOnAssets'), True)
         updated_data['Return on Equity'] = self.__ratio_helper_get_standardized_value(data.get('returnOnEquity'), True)
@@ -118,24 +119,21 @@ class StockDetails:
         updated_data['Forward EPS'] = self.__ratio_helper_get_standardized_value(data.get('forwardEps'))
         self.standardized_data['Ratios'] = updated_data
 
+
+    def get_stock_graph(self, time_period='1d'):
+        print('I am atleast called')
+        intervals = {
+            '1d': '2m', '5d': '1h', '1mo': '1h', '3mo': '1d', '6mo': '1d',
+            'ytd': '5d', '1y': '5d', '2y': '5d', '5y': '1wk', '10y': '3mo', 'max': '3mo'
+        }
+        df = yf.download(self.stock_code, period=time_period, interval=intervals[time_period])
+        df = df['Close']
+        df.index.tz_convert('Asia/Kolkata')
+        return df
+
+
 if __name__ == '__main__':
-    # s= StockDetails('GPIL.NS').stock
-    # split_factor = 1
-    # sh = s.history(start='2000-01-01')
-    # sh['Adj Close'] = 0  # Create a new column 'Adj Close' initialized to 0
-    #
-    # for index, row in sh.iterrows():
-    #     if row['Stock Splits'] != 0:
-    #         split_factor *= row['Stock Splits']
-    #         print('SF: ', split_factor)
-    #     sh.at[index, 'Adj Close'] = row['Close'] / split_factor
-    #
-    # print(sh[['Close', 'Stock Splits', 'Adj Close']])
-    # sh.to_csv('stock_data.csv', index=False)
-    # import yfinance as yf
-    # response = yf.screen(indian_aggressive_small_cap)
-    # print(response)
-    pass
+    print(StockDetails('HINDALCO.NS').get_stock_graph('1d'))
 
 
 

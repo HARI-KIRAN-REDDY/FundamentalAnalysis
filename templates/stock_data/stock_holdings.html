@@ -1,0 +1,62 @@
+<div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
+    <h3 class="text-2xl font-extrabold text-blue-900 mb-6 text-center bg-blue-200 py-3 rounded-lg shadow-md">
+        Stock Holdings Overview
+    </h3>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="p-6 bg-white rounded-xl shadow-lg flex flex-col items-center text-center border-t-4 border-green-500">
+            <div class="text-lg font-semibold text-gray-600">Market Capital</div>
+            <div id="market-cap" class="text-2xl font-bold text-green-700 mt-2"></div>
+        </div>
+        <div class="p-6 bg-white rounded-xl shadow-lg flex flex-col items-center text-center border-t-4 border-blue-500">
+            <div class="text-lg font-semibold text-gray-600">Shares Outstanding</div>
+            <div id="shares-out" class="text-2xl font-bold text-blue-800 mt-2"></div>
+        </div>
+    </div>
+
+    <div id="shareholding-chart" class="mt-2 p-0 bg-white rounded-xl shadow-lg text-center">
+        <div id="holding-piechart" class="mx-auto" style="width:100%; max-width:400px; height:auto;"></div>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var promoters = {{ data["Share Holding"]["Promoters Holding"] }};
+        var institutions = {{ data["Share Holding"]["Institutions Holding"] }};
+        var others = {{ data["Share Holding"]["Others Holding"] }};
+        var marketCap = "{{ data["Share Holding"]["Market Capital"] }}";
+        var sharesOut = {{ data["Share Holding"]["Shares Outstanding"] }};
+
+        document.querySelector("#market-cap").textContent = marketCap;
+        document.querySelector("#shares-out").textContent = sharesOut;
+
+        var data = [{
+            labels: ["Promoters", "Institutions", "Others"],
+            values: [promoters, institutions, others],
+            type: "pie",
+            marker: {
+                colors: ["#8ac926", "#ffca3a", "#ff595e"]
+            },
+            textinfo: "label+percent",
+            hoverinfo: "label+percent+value"
+        }];
+
+        var layout = {
+            title: "Shareholding Distribution",
+            font: { family: "Arial, sans-serif", size: 14, color: "#333" },
+            paper_bgcolor: "#f8f9fa",
+            margin: { t: 40, b: 0, l: 20, r: 0 },
+            responsive: true // Enable auto-scaling
+        };
+
+        Plotly.newPlot("holding-piechart", data, layout);
+
+        // Resize event to make it fully responsive
+        window.addEventListener('resize', function() {
+            Plotly.relayout("holding-piechart", {
+                'autosize': true
+            });
+        });
+    });
+</script>

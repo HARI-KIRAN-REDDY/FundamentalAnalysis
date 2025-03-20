@@ -40,7 +40,6 @@ def get_suggestions():
 
     return jsonify(suggestions)  # Return all results
 
-
 @app.route('/')
 def home():
     screens = {
@@ -62,6 +61,12 @@ def display_data():
 @app.route('/login')
 def login():
     return '<h1>login feature is still in development, please comeback later</h1>'
+
+
+@app.route('/time_period', methods=['POST'])
+def update_stock_graph():
+    pass
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
