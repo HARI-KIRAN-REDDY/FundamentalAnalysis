@@ -1,34 +1,52 @@
-<select id="timePeriodSelect">
-    <option value="1d">1-Day</option>
-    <option value="5d">5-Days</option>
-    <option value="1mo">1-Month</option>
-    <option value="3mo">3-Months</option>
-    <option value="6mo">6-Months</option>
-    <option value="ytd">Year-to-Date</option>
-    <option value="1y" selected>1-Year</option>
-    <option value="2y">2-Years</option>
-    <option value="5y">5-Years</option>
-    <option value="10y">10-Years</option>
-    <option value="max">Max</option>
-</select>
+<style>
+    .custom-select {
+        position: relative;
+        width: 200px;
+    }
 
-<script>
-    document.getElementById("timePeriodSelect").addEventListener("change", function() {
-        var selectedValue = this.value;
+    select {
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 2px solid #4A90E2;
+        background: white;
+        color: #333;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        outline: none;
+        appearance: none; /* Remove default arrow */
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
 
-        fetch('/time_period', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ time_period: selectedValue })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                location.reload();  // Refresh page to reflect new graph data
-            } else {
-                alert("Error updating graph!");
-            }
-        })
-        .catch(error => console.error('Error:', error));
-    });
-</script>
+    select:hover {
+        border-color: #357ABD;
+    }
+
+    select:focus {
+        border-color: #2C6EB2;
+        box-shadow: 0 0 8px rgba(42, 120, 218, 0.5);
+    }
+
+    .custom-select::after {
+        content: '▼';
+        position: absolute;
+        top: 50%;
+        right: 15px;
+        transform: translateY(-50%);
+        font-size: 14px;
+        color: #4A90E2;
+        pointer-events: none;
+    }
+</style>
+
+<div class="custom-select">
+    <select id="movingAvg" name="movingAvg">
+        <option value="1">1 Month</option>
+        <option value="2">2 Months</option>
+        <option value="3" selected>3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="12">12 Months</option>
+    </select>
+</div>

@@ -4,6 +4,7 @@ from app.api_operations.stocks_dict import symbol_to_company
 from app.api_operations.StockDetails import StockDetails
 from app.api_operations.exchange_codes import get_exchange_country
 from app.api_operations.stock_screens import StockScreens
+import mysql.connector
 
 app = Flask(__name__)
 
@@ -66,6 +67,38 @@ def login():
 @app.route('/time_period', methods=['POST'])
 def update_stock_graph():
     pass
+
+
+
+
+# Route to serve the HTML page
+@app.route("/fiidii")
+def fii_dii():
+    return render_template("fiidii.html")
+
+# API to fetch data from MySQL
+@app.route("/api/data")
+def get_data():
+    try:
+        # Database connection details
+        DB_CONFIG = {
+            "host": "sql12.freesqldatabase.com",
+            "database": "sql12768724",
+            "user": "sql12768724",
+            "password": "LbPLSsGhUz",
+            "port": 3306
+        }
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM fiidii_trades")
+        data = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 
 
 if __name__ == '__main__':

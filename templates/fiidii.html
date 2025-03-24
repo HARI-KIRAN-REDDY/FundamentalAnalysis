@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    <h2>FIIDII Trades</h2>
+
+
+    <label for="movingAvg">Select Moving Average:
+    <select id="movingAvg"  style="color: black;">
+        <option value="1">1 Month</option>
+        <option value="2">2 Months</option>
+        <option value="3" selected>3 Months</option>
+        <option value="6">6 Months</option>
+        <option value="12">12 Months</option>
+    </select>
+        </label>
+
+
+
+    <div id="chart-container"  style="width: 90vw; height: 90vh;"></div>
+    <br><br><br>
+   <div id="table-container" style="
+        width: 100%;
+        max-width: 100%;
+        overflow-x: auto;
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+        color: #333;">
+        Loading data...
+   </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("/api/data")
+                .then(response => response.json())
+                .then(data => {
+                    if (!Array.isArray(data)) {
+                        document.getElementById("table-container").innerHTML = "<p>Error: Invalid data format.</p>";
+                        return;
+                    }
+
+                    let table = "<table border='1'><tr>";
+                    table += "<th>Date</th><th>Gross Purchase (FII)</th><th>Gross Sales (FII)</th><th>Net Purchase/Sales (FII)</th><th>Gross Purchase (DII)</th><th>Gross Sales (DII)</th><th>Net Purchase/Sales (DII)</th><th>Overall Net (FII + DII)</th></tr>";
+
+                    let dates = [];
+                    let fiiNet = [];
+                    let diiNet = [];
+                    let overallNet = [];
+
+                    data.forEach(row => {
+                        let formattedDate = new Date(row.trade_date).toLocaleDateString("en-GB", {
+                            month: "2-digit",
+                            year: "numeric"
+                        }).replace("/", "-"); // Format MM-YYYY
+
+                        let fiiValue = parseFloat(row.net_purchase_sales_fii) || 0;
+                        let diiValue = parseFloat(row.net_purchase_sales_dii) || 0;
+                        let totalValue = fiiValue + diiValue;
+
+                        table += `<tr>
+                                    <td>${formattedDate || ''}</td>
+                                    <td>${row.gross_purchase_fii || ''}</td>
+                                    <td>${row.gross_sales_fii || ''}</td>
+                                    <td>${row.net_purchase_sales_fii || ''}</td>
+                                    <td>${row.gross_purchase_dii || ''}</td>
+                                    <td>${row.gross_sales_dii || ''}</td>
+                                    <td>${row.net_purchase_sales_dii || ''}</td>
+                                    <td>${totalValue}</td>
+                                  </tr>`;
+
+                        dates.push(formattedDate);
+                        fiiNet.push(fiiValue);
+                        diiNet.push(diiValue);
+                        overallNet.push(totalValue);
+                    });
+
+                    table += "</table>";
+                    document.getElementById("table-container").innerHTML = table;
+
+                    function movingAverage(arr, windowSize) {
+                        return arr.map((_, idx, src) => {
+                            if (idx < windowSize - 1) return null;
+                            let sum = src.slice(idx - windowSize + 1, idx + 1).reduce((a, b) => a + b, 0);
+                            return sum / windowSize;
+                        });
+                    }
+
+                    function updateChart(windowSize) {
+                        let fiiMA = movingAverage(fiiNet, windowSize);
+                        let diiMA = movingAverage(diiNet, windowSize);
+                        let overallMA = movingAverage(overallNet, windowSize);
+
+                        let traceFII = {
+                            x: dates,
+                            y: fiiMA,
+                            mode: "lines",
+                            name: `FII ${windowSize}M MA`,
+                            line: { color: "blue" }
+                        };
+
+                        let traceDII = {
+                            x: dates,
+                            y: diiMA,
+                            mode: "lines",
+                            name: `DII ${windowSize}M MA`,
+                            line: { color: "red" }
+                        };
+
+                        let traceOverall = {
+                            x: dates,
+                            y: overallMA,
+                            mode: "lines",
+                            name: `Overall ${windowSize}M MA`,
+                            line: { color: "green" },
+                             visible: "legendonly"
+                        };
+
+                        let layout = {
+                            title: `${windowSize}-Month Moving Average of Net Sell (DII & FII)`,
+                            xaxis: { title: "Month-Year" },
+                            yaxis: { title: "Net Sell Value" },
+                             legend: { x: 0.5, y: 1.15, xanchor: "center", yanchor: "top",  orientation: "h" }
+                        };
+
+                        Plotly.newPlot("chart-container", [traceFII, traceDII, traceOverall], layout);
+                    }
+
+                    let movingAvgSelect = document.getElementById("movingAvg");
+                    movingAvgSelect.addEventListener("change", function () {
+                        updateChart(parseInt(this.value));
+                    });
+
+                    updateChart(3); // Default to 3-month MA
+                })
+                .catch(error => {
+                    console.error("Fetch error:", error);
+                    document.getElementById("table-container").innerHTML = "<p>Error fetching data.</p>";
+                });
+        });
+    </script>
+{% endblock %}
+
