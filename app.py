@@ -1,10 +1,11 @@
 from flask import render_template, Flask, request, jsonify
 import yfinance as yf
-from app.api_operations.stocks_dict import symbol_to_company
+import io
 from app.api_operations.StockDetails import StockDetails
 from app.api_operations.exchange_codes import get_exchange_country
 from app.api_operations.stock_screens import StockScreens
-import mysql.connector
+import pandas as pd
+import requests
 
 app = Flask(__name__)
 
@@ -76,24 +77,12 @@ def update_stock_graph():
 def fii_dii():
     return render_template("fiidii.html")
 
-# API to fetch data from MySQL
 @app.route("/api/data")
 def get_data():
     try:
-        # Database connection details
-        DB_CONFIG = {
-            "host": "sql12.freesqldatabase.com",
-            "database": "sql12768724",
-            "user": "sql12768724",
-            "password": "LbPLSsGhUz",
-            "port": 3306
-        }
-        conn = mysql.connector.connect(**DB_CONFIG)
-        cursor = conn.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM fiidii_trades")
-        data = cursor.fetchall()
-        cursor.close()
-        conn.close()
+        response = requests.get("https://raw.githubusercontent.com/HARI-KIRAN-REDDY/FIIDIIData/main/fii_dii.csv")
+        df = pd.read_csv(io.StringIO(response.text))
+        data = df.to_dict(orient="records")
         return jsonify(data)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
