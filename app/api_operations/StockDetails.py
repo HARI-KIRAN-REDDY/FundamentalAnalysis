@@ -1,5 +1,6 @@
 from flask import jsonify
 from app.api_operations.custom_quires import *
+import requests
 
 
 class StockDetails:
@@ -133,7 +134,7 @@ class StockDetails:
 
 
 if __name__ == '__main__':
-    print(StockDetails('HINDALCO.NS').get_stock_graph('1d'))
+    print(StockDetails('HINDALCO.NS').data)
 
 
 
