@@ -26,8 +26,9 @@ class StockDetails:
     def get_data(self):
         for detail_key in self.detail_keys:
             detail_dict = {}
+            info = self.stock.info
             for d_key in self.detail_keys[detail_key]:
-                detail_dict[d_key] = self.stock.info.get(d_key, 'N/A')
+                detail_dict[d_key] = info.get(d_key, 'N/A')
             self.data[detail_key] = detail_dict
         return self.data
 
@@ -134,7 +135,8 @@ class StockDetails:
 
 
 if __name__ == '__main__':
-    print(StockDetails('HINDALCO.NS').data)
+    print(yf.Ticker('HINDALCO.NS').cashflow)
+    print(StockDetails('HINDALCO.NS').get_data())
 
 
 
