@@ -45,10 +45,10 @@ def get_suggestions():
 @app.route('/')
 def home():
     screens = {
-    'Large Cap Value Stock Screen': StockScreens.get_large_cap_value_stocks(),
-    'Mid Cap Value Stock Screen': StockScreens.get_mid_cap_value_stocks(),
-    'Mid Cap Aggressive Stock Screen': StockScreens.get_mid_cap_aggressive_stocks(),
-    'Small Cap Aggressive Stock Screen': StockScreens.get_small_cap_aggressive_stocks()
+    # 'Large Cap Value Stock Screen': StockScreens.get_large_cap_value_stocks(),
+    # 'Mid Cap Value Stock Screen': StockScreens.get_mid_cap_value_stocks(),
+    # 'Mid Cap Aggressive Stock Screen': StockScreens.get_mid_cap_aggressive_stocks(),
+    # 'Small Cap Aggressive Stock Screen': StockScreens.get_small_cap_aggressive_stocks()
     }
     return render_template('index.html', screens=screens)
 
