@@ -1,6 +1,9 @@
 from flask import jsonify
 from app.api_operations.custom_quires import *
 import requests
+import requests_cache
+
+requests_cache.install_cache('yfinance_cache', expire_after=3600)
 
 
 class StockDetails:
@@ -135,8 +138,12 @@ class StockDetails:
 
 
 if __name__ == '__main__':
-    print(yf.Ticker('HINDALCO.NS').cashflow)
-    print(StockDetails('HINDALCO.NS').get_data())
+    sd = yf.Ticker('GPIL.NS')
+    print(sd.cashflow)
+    print(sd.balancesheet)
+    print(sd.earnings_estimate)
+    print(sd.incomestmt)
+    print(sd.income_stmt)
 
 
 
