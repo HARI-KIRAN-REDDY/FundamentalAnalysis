@@ -26,6 +26,8 @@ class StockDetails:
                       'operatingMargins']
         }
 
+
+
     def get_data(self):
         for detail_key in self.detail_keys:
             detail_dict = {}
@@ -138,12 +140,11 @@ class StockDetails:
 
 
 if __name__ == '__main__':
-    sd = yf.Ticker('GPIL.NS')
-    print(sd.cashflow)
-    print(sd.balancesheet)
-    print(sd.earnings_estimate)
-    print(sd.incomestmt)
-    print(sd.income_stmt)
+    sd = 'GPIL.NS'
+    url = f"https://query1.finance.yahoo.com/v10/finance/quoteSummary/{sd}?modules=price"
+    headers = {'User-Agent': 'Mozilla/5.0'}
+    r = requests.get(url, headers=headers)
+    print(r.json())
 
 
 

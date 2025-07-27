@@ -87,6 +87,22 @@ def get_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+@app.route("/api/daily_nifty_pe_data")
+def get_daily_nifty_pe_data():
+    try:
+        response = requests.get("https://raw.githubusercontent.com/HARI-KIRAN-REDDY/FIIDIIData/main/nifty_pe_pb_div.csv")
+        df = pd.read_csv(io.StringIO(response.text))
+        data = df.to_dict(orient="records")
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/nifty-pe-pb")
+def nifty_pe_pb():
+    return render_template("nifty_pe_pb.html")  # Create this page next
+
+
+
 
 
 

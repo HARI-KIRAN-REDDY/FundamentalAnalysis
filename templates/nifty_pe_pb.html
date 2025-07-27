@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+  <h2 class="text-3xl font-bold text-center mb-6">Nifty PE Trend</h2>
+
+  <div class="flex justify-center mb-4">
+    <select id="rangeSelector" class="border p-2 rounded text-black">
+      <option value="1">1Y</option>
+      <option value="2">2Y</option>
+      <option value="3">3Y</option>
+      <option value="5">5Y</option>
+      <option value="10">10Y</option>
+      <option value="max">Max</option>
+    </select>
+  </div>
+
+  <!-- ⚠️ Important: Make this div position relative -->
+  <div id="niftyChart" class="w-full relative" style="position: relative; min-height: 500px;"></div>
+</div>
+
+<!-- ✅ Move Plotly toolbar to bottom center -->
+<style>
+  /* Force modebar to bottom center */
+  #niftyChart .modebar {
+    position: absolute !important;
+    bottom: 0 !important;
+    top: auto !important;
+    right: 5% !important;
+    transform: translateX(-50%) !important;
+  }
+</style>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+  async function fetchData() {
+    const res = await fetch("/api/daily_nifty_pe_data");
+    const raw = await res.json();
+    const parseDate = d => new Date(d.Date.split(" ").reverse().join(" "));
+    return raw.map(d => ({
+      date: parseDate(d),
+      pe: d.PE,
+      insight:
+        d.PE < 19
+          ? "Once in a decade opportunity to buy"
+          : d.PE < 21.5
+          ? "Buying opportunity"
+          : d.PE < 23.5
+          ? "Be cautious"
+          : "Profit Booking Time"
+    }));
+  }
+
+  function getPEZones(ymin, ymax) {
+    return [
+      { y0: 0, y1: 19, color: "rgba(16, 185, 129, 0.3)" },
+      { y0: 19, y1: 21.5, color: "rgba(132, 204, 22, 0.3)" },
+      { y0: 21.5, y1: 23.5, color: "rgba(252, 211, 77, 0.35)" },
+      { y0: 23.5, y1: ymax, color: "rgba(239, 68, 68, 0.35)" },
+    ].map(zone => ({
+      type: "rect",
+      xref: "paper",
+      yref: "y",
+      x0: 0,
+      x1: 1,
+      y0: zone.y0,
+      y1: zone.y1,
+      fillcolor: zone.color,
+      opacity: 0.5,
+      line: { width: 0 }
+    }));
+  }
+
+  function plotChart(data, years) {
+    const today = new Date();
+    const cutoffDate = new Date();
+    cutoffDate.setFullYear(today.getFullYear() - years);
+    const filtered = years === "max" ? data : data.filter(d => d.date >= cutoffDate);
+
+    const trace = {
+      x: filtered.map(d => d.date),
+      y: filtered.map(d => d.pe),
+      mode: "lines+markers",
+      type: "scatter",
+      name: "Nifty PE",
+      marker: { color: "rgb(0, 123, 255)" },
+      text: filtered.map(d => d.insight),
+      hovertemplate: "<b>%{x|%d %b %Y}</b><br>PE: %{y:.2f}<br>%{text}<extra></extra>",
+    };
+
+    const peMax = Math.max(...filtered.map(d => d.pe), 25);
+
+    Plotly.newPlot("niftyChart", [trace], {
+      margin: { t: 30, r: 10, l: 50 },
+      shapes: getPEZones(15, peMax),
+      yaxis: { title: "PE Ratio", range: [15, peMax] },
+      xaxis: { title: "Date", type: "date" },
+    }, {
+      responsive: true,
+      displayModeBar: true
+    });
+  }
+
+  async function setup() {
+    const data = await fetchData();
+    plotChart(data, 1);
+
+    document.getElementById("rangeSelector").addEventListener("change", e => {
+      const val = e.target.value;
+      plotChart(data, val === "max" ? "max" : parseInt(val));
+    });
+  }
+
+  setup();
+</script>
+{% endblock %}
