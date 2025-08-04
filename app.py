@@ -3,7 +3,7 @@ import yfinance as yf
 import io
 from app.api_operations.StockDetails import StockDetails
 from app.api_operations.exchange_codes import get_exchange_country
-from app.api_operations.stock_screens import StockScreens
+from app.etl_jobs.etl_jobs import daily_bulk_deals_update_transformation
 import pandas as pd
 import requests
 
@@ -100,6 +100,13 @@ def get_daily_nifty_pe_data():
 @app.route("/nifty-pe-pb")
 def nifty_pe_pb():
     return render_template("nifty_pe_pb.html")  # Create this page next
+
+@app.route("/api/daily_bulk_deals")
+def get_daily_bulk_deals_transformed_data():
+    try:
+        return daily_bulk_deals_update_transformation()
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

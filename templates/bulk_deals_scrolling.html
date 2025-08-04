@@ -1,0 +1,56 @@
+<div class="ticker-container">
+  <div class="ticker-content" id="bulkTicker">
+    Loading bulk trades...
+  </div>
+</div>
+
+<script>
+  async function fetchBulkDeals() {
+    try {
+      const res = await fetch("/api/daily_bulk_deals");
+      const data = await res.json();
+
+      if (!Array.isArray(data)) {
+        document.getElementById("bulkTicker").innerText = "No bulk trades found.";
+        return;
+      }
+
+      const items = data.map(item => `🚨 ${item.Symbol} - ₹${(item["Trade Value"]).toFixed(2)} Cr`).join(" ");
+      const ticker = `🚨 Today's Bulk Trades (Net Value) 🚨 ${items} `.repeat(5);
+
+      document.getElementById("bulkTicker").innerText = ticker;
+
+    } catch (err) {
+      document.getElementById("bulkTicker").innerText = "Error loading bulk deals.";
+      console.error(err);
+    }
+  }
+
+  fetchBulkDeals();
+</script>
+
+<style>
+.ticker-container {
+  width: 100%;
+  overflow: hidden;
+  background-color: rgba(0, 0, 0, 0.9);
+  border-top: 2px solid lime;
+  border-bottom: 2px solid lime;
+  padding: 8px 0;
+}
+
+.ticker-content {
+  display: inline-block;
+  white-space: nowrap;
+  font-family: monospace;
+  font-size: 1rem;
+  color: #00ff00;
+  text-shadow: 0 0 5px #00ff00;
+  animation: scroll-left 20s linear infinite;
+}
+
+@keyframes scroll-left {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+</style>
