@@ -1,56 +1,115 @@
-<div class="ticker-container">
-  <div class="ticker-content" id="bulkTicker">
-    Loading bulk trades...
-  </div>
-</div>
+<h1 class="bulk-title">🚨 Today's Bulk Deals 🚨</h1>
+<div id="bulkDealsContainer" class="cards-grid"></div>
 
 <script>
-  async function fetchBulkDeals() {
-    try {
-      const res = await fetch("/api/daily_bulk_deals");
-      const data = await res.json();
+async function loadBulkDeals() {
+  try {
+    const res = await fetch("/api/daily_bulk_deals");
+    const data = await res.json();
 
-      if (!Array.isArray(data)) {
-        document.getElementById("bulkTicker").innerText = "No bulk trades found.";
-        return;
-      }
-
-      const items = data.map(item => `🚨 ${item.Symbol} - ₹${(item["Trade Value"]).toFixed(2)} Cr`).join(" ");
-      const ticker = `🚨 Today's Bulk Trades (Net Value) 🚨 ${items} `.repeat(5);
-
-      document.getElementById("bulkTicker").innerText = ticker;
-
-    } catch (err) {
-      document.getElementById("bulkTicker").innerText = "Error loading bulk deals.";
-      console.error(err);
+    if (!Array.isArray(data) || !data.length) {
+      document.getElementById("bulkDealsContainer").innerHTML = "<p>No bulk deals found.</p>";
+      return;
     }
-  }
 
-  fetchBulkDeals();
+    // Group by symbol
+    const grouped = data.reduce((acc, deal) => {
+      if (!acc[deal.Symbol]) acc[deal.Symbol] = [];
+      acc[deal.Symbol].push(deal);
+      return acc;
+    }, {});
+
+    // Sort cards by number of clients (descending)
+    const sortedGroups = Object.entries(grouped)
+      .sort((a, b) => b[1].length - a[1].length);
+
+    const container = document.getElementById("bulkDealsContainer");
+    container.innerHTML = "";
+
+    sortedGroups.forEach(([symbol, deals]) => {
+      const netValue = deals[0]["Net Trade Value"];
+      const netColor = netValue > 0 ? "limegreen" : netValue < 0 ? "red" : "gray";
+
+      // Sort deals inside card by trade value (descending)
+      deals.sort((a, b) => Math.abs(b["Trade Value"]) - Math.abs(a["Trade Value"]));
+
+      const rows = deals.map(d => `
+        <tr>
+          <td title="${d["Client Name"]}" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            ${d["Client Name"]}
+          </td>
+          <td style="color:${d.Transaction === "Bought" ? "limegreen" : "red"};">
+            ₹${d["Trade Value"].toFixed(2)} Cr
+          </td>
+        </tr>
+      `).join("");
+
+      const card = document.createElement("div");
+      card.className = "deal-card";
+      card.innerHTML = `
+        <div class="card-hero" style="border-bottom: 2px solid ${netColor};">
+          <h2>${symbol}</h2>
+          <span style="color:${netColor};">₹${netValue.toFixed(2)} Cr</span>
+        </div>
+        <table class="deal-table">
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+      container.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("bulkDealsContainer").innerHTML = "<p>Error loading bulk deals.</p>";
+  }
+}
+
+loadBulkDeals();
 </script>
 
 <style>
-.ticker-container {
-  width: 100%;
+.bulk-title {
+  text-align: center;
+  color: #00ff88; /* Hacker-style green, more refined */
+  font-family: 'Courier New', Courier, monospace; /* Professional monospace font */
+  text-shadow: 0 0 4px #00cc66, 0 0 10px rgba(0, 255, 136, 0.4); /* Layered subtle glow */
+  background-color: #000; /* Optional: solid black background */
+  padding: 1rem;
+  margin-top: 1rem;
+  border-bottom: 1px solid #004422; /* Optional: subtle divider */
+}
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+}
+.deal-card {
+  background: #111;
+  border-radius: 10px;
+  box-shadow: 0 0 8px rgba(0,255,0,0.3);
   overflow: hidden;
-  background-color: rgba(0, 0, 0, 0.9);
-  border-top: 2px solid lime;
-  border-bottom: 2px solid lime;
-  padding: 8px 0;
+  display: flex;
+  flex-direction: column;
 }
-
-.ticker-content {
-  display: inline-block;
-  white-space: nowrap;
-  font-family: monospace;
-  font-size: 1rem;
-  color: #00ff00;
-  text-shadow: 0 0 5px #00ff00;
-  animation: scroll-left 20s linear infinite;
+.card-hero {
+  padding: 0.75rem;
+  background: rgba(0,255,0,0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
-
-@keyframes scroll-left {
-  0%   { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
+.card-hero h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+.deal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.deal-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 </style>
