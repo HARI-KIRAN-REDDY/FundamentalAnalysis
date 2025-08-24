@@ -1,21 +1,53 @@
-<div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-8 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">
-    <h3 class="text-2xl font-extrabold text-blue-900 mb-6 text-center bg-blue-200 py-3 rounded-lg shadow-md">
+<div
+  class="bg-white bg-opacity-20 border border-white border-opacity-30 p-8 rounded-2xl shadow-lg
+         backdrop-filter backdrop-saturate-150 backdrop-brightness-110
+         transition-shadow duration-300 ease-in-out hover:shadow-[0_15px_40px_rgba(59,130,246,0.4)]"
+  style="box-shadow:
+         inset 0 1px 0 rgba(255, 255, 255, 0.6),
+         0 4px 15px rgba(14, 165, 233, 0.3);"
+>
+    <h3
+      class="text-2xl font-extrabold text-blue-900 mb-6 text-center"
+      style="background-color: rgba(179, 229, 252, 0.6); /* soft sky blue */
+             padding: 12px 0;
+             border-radius: 12px;
+             box-shadow: 0 2px 8px rgba(0, 123, 255, 0.25);"
+    >
         Stock Holdings Overview
     </h3>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="p-6 bg-white rounded-xl shadow-lg flex flex-col items-center text-center border-t-4 border-green-500">
-            <div class="text-lg font-semibold text-gray-600">Market Capital</div>
+        <div
+          class="p-6 bg-white bg-opacity-25 rounded-xl shadow-md flex flex-col items-center text-center
+                 border-t-4 border-green-500
+                 backdrop-filter backdrop-saturate-150 backdrop-brightness-105"
+          style="box-shadow: inset 0 0 10px rgba(255,255,255,0.4);"
+        >
+            <div class="text-lg font-semibold text-gray-700">Market Capital</div>
             <div id="market-cap" class="text-2xl font-bold text-green-700 mt-2"></div>
         </div>
-        <div class="p-6 bg-white rounded-xl shadow-lg flex flex-col items-center text-center border-t-4 border-blue-500">
-            <div class="text-lg font-semibold text-gray-600">Shares Outstanding</div>
-            <div id="shares-out" class="text-2xl font-bold text-blue-800 mt-2"></div>
+        <div
+          class="p-6 bg-white bg-opacity-25 rounded-xl shadow-md flex flex-col items-center text-center
+                 border-t-4 border-blue-600
+                 backdrop-filter backdrop-saturate-150 backdrop-brightness-105"
+          style="box-shadow: inset 0 0 10px rgba(255,255,255,0.4);"
+        >
+            <div class="text-lg font-semibold text-gray-700">Shares Outstanding</div>
+            <div id="shares-out" class="text-2xl font-bold text-blue-700 mt-2"></div>
         </div>
     </div>
 
-    <div id="shareholding-chart" class="mt-2 p-0 bg-white rounded-xl shadow-lg text-center">
-        <div id="holding-piechart" class="mx-auto" style="width:100%; max-width:400px; height:auto;"></div>
+    <div
+      id="shareholding-chart"
+      class="mt-4 p-0 bg-white bg-opacity-25 rounded-xl shadow-md text-center
+             backdrop-filter backdrop-saturate-150 backdrop-brightness-105"
+      style="box-shadow: inset 0 0 12px rgba(255,255,255,0.5);"
+    >
+        <div
+          id="holding-piechart"
+          class="mx-auto"
+          style="width: 100%; max-width: 400px; height: auto;"
+        ></div>
     </div>
 </div>
 
@@ -45,14 +77,13 @@
         var layout = {
             title: "Shareholding Distribution",
             font: { family: "Arial, sans-serif", size: 14, color: "#333" },
-            paper_bgcolor: "#f8f9fa",
+            paper_bgcolor: "rgba(255, 255, 255, 0.1)",
             margin: { t: 40, b: 0, l: 20, r: 0 },
-            responsive: true // Enable auto-scaling
+            responsive: true
         };
 
         Plotly.newPlot("holding-piechart", data, layout);
 
-        // Resize event to make it fully responsive
         window.addEventListener('resize', function() {
             Plotly.relayout("holding-piechart", {
                 'autosize': true

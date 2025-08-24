@@ -1,17 +1,27 @@
 <!-- Stock Overview Grid -->
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
-    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">{% include "stock_data/stock_details.html" %}</div>
-    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">{% include "stock_data/stock_targets.html" %}</div>
-    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">{% include "stock_data/stock_holdings.html" %}</div>
-    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">{% include "stock_data/stock_ratios.html" %}</div>
-    <div class="bg-gradient-to-bl from-gray-100 to-gray-300 p-6 rounded-xl shadow-xl hover:shadow-2xl transition-shadow duration-300 ease-in-out">{% include "stock_data/stock_financials.html" %}</div>
+    <div class="bg-white bg-opacity-10 p-6 rounded-xl border border-blue-300 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
+        {% include "stock_data/stock_details.html" %}
+    </div>
+    <div class="bg-white bg-opacity-10 p-6 rounded-xl border border-blue-300 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
+        {% include "stock_data/stock_targets.html" %}
+    </div>
+    <div class="bg-white bg-opacity-10 p-6 rounded-xl border border-blue-300 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
+        {% include "stock_data/stock_holdings.html" %}
+    </div>
+    <div class="bg-white bg-opacity-10 p-6 rounded-xl border border-blue-300 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
+        {% include "stock_data/stock_ratios.html" %}
+    </div>
+    <div class="bg-white bg-opacity-10 p-6 rounded-xl border border-blue-300 shadow-md hover:shadow-lg transition-shadow duration-300 ease-in-out">
+        {% include "stock_data/stock_financials.html" %}
+    </div>
 </div>
 
 <style>
     @media (min-width: 1024px) {
         .table-bordered {
-            border-left: 8px solid #007BFF;
-            border-right: 8px solid #007BFF;
+            border-left: 6px solid #2563EB; /* Tailwind blue-600 */
+            border-right: 6px solid #2563EB;
         }
     }
 </style>
