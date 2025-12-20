@@ -108,8 +108,21 @@ def get_daily_bulk_deals_transformed_data():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
+@app.route("/api/hist_bulk_deals")
+def get_historical_bulk_deal_data():
+    try:
+        response = requests.get("https://raw.githubusercontent.com/HARI-KIRAN-REDDY/FIIDIIData/main/modified_historical_bulk_deals.csv")
+        df = pd.read_csv(io.StringIO(response.text))
+        data = df.to_dict(orient="records")
+        return jsonify(data)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+@app.route("/hist_bulk_1")
+def hist_bulk_1():
+    return render_template("hist_bulk_1.html")
+@app.route("/hist_bulk_search")
+def hist_bulk_search():
+    return render_template("hist_bulk_search.html")
 
 
 

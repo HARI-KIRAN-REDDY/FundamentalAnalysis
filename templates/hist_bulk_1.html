@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}Historical Bulk Deals{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-4">📊 Historical Bulk Deals Analysis</h2>
+
+<!-- Navigation Actions -->
+<div class="flex flex-wrap gap-4 mb-6 justify-center">
+
+    <!-- Search Page Button -->
+    <a href="/hist_bulk_search"
+       class="bg-purple-500 hover:bg-purple-700 text-white font-semibold
+              py-2 px-5 rounded-lg shadow-md transition-colors duration-300">
+        🔍 Search by Stock / Client
+    </a>
+
+</div>
+
+<!-- Date Filters -->
+<div class="flex flex-wrap gap-3 mb-6 justify-center items-center">
+
+    <button onclick="applyPreset('7d', this)" class="filter-btn preset-btn">1 Week</button>
+    <button onclick="applyPreset('1m', this)" class="filter-btn preset-btn active">1 Month</button>
+    <button onclick="applyPreset('3m', this)" class="filter-btn preset-btn">3 Months</button>
+    <button onclick="applyPreset('6m', this)" class="filter-btn preset-btn">6 Months</button>
+    <button onclick="applyPreset('1y', this)" class="filter-btn preset-btn">1 Year</button>
+
+    <!-- Custom Date -->
+    <input type="date" id="fromDate" class="date-input">
+    <input type="date" id="toDate" class="date-input">
+    <button onclick="applyCustom()" class="filter-btn bg-yellow-500 hover:bg-yellow-600">
+        Apply
+    </button>
+</div>
+
+<!-- Results -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 w-full max-w-6xl">
+
+    <!-- Most Bought -->
+    <div class="bg-black bg-opacity-30 rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-semibold mb-4 text-green-400">
+            🟢 Most Bought Stocks (Top 15)
+        </h3>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-gray-500">
+                    <th>Symbol</th>
+                    <th class="text-right">Net Value</th>
+                </tr>
+            </thead>
+            <tbody id="boughtTable"></tbody>
+        </table>
+    </div>
+
+    <!-- Most Sold -->
+    <div class="bg-black bg-opacity-30 rounded-xl p-6 shadow-lg">
+        <h3 class="text-xl font-semibold mb-4 text-red-400">
+            🔴 Most Sold Stocks (Top 15)
+        </h3>
+        <table class="w-full text-left">
+            <thead>
+                <tr class="border-b border-gray-500">
+                    <th>Symbol</th>
+                    <th class="text-right">Net Value</th>
+                </tr>
+            </thead>
+            <tbody id="soldTable"></tbody>
+        </table>
+    </div>
+
+</div>
+
+<!-- Styling -->
+<style>
+    .filter-btn {
+        background-color: #3b82f6;
+        color: white;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        transition: all 0.2s ease;
+    }
+
+    .filter-btn:hover {
+        background-color: #1d4ed8;
+    }
+
+    .filter-btn.active {
+        background-color: #22c55e;
+        box-shadow: 0 0 0 2px rgba(34,197,94,0.8);
+    }
+
+    .date-input {
+        color: black;
+        border-radius: 0.5rem;
+        padding: 0.25rem 0.5rem;
+    }
+</style>
+
+<!-- Logic -->
+<script>
+let rawData = [];
+
+// Load data
+fetch("/api/hist_bulk_deals")
+    .then(res => res.json())
+    .then(data => {
+        rawData = data;
+        applyPreset('1m', document.querySelector(".preset-btn.active"));
+    });
+
+function parseDate(d) {
+    return new Date(d);
+}
+
+function applyPreset(type, btn) {
+    const now = new Date();
+    let from = new Date();
+
+    if (type === '7d') from.setDate(now.getDate() - 7);
+    if (type === '1m') from.setMonth(now.getMonth() - 1);
+    if (type === '3m') from.setMonth(now.getMonth() - 3);
+    if (type === '6m') from.setMonth(now.getMonth() - 6);
+    if (type === '1y') from.setFullYear(now.getFullYear() - 1);
+
+    document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+    if (btn) btn.classList.add("active");
+
+    filterData(from, now);
+}
+
+function applyCustom() {
+    document.querySelectorAll(".preset-btn").forEach(b => b.classList.remove("active"));
+
+    const fromVal = document.getElementById("fromDate").value;
+    const toVal = document.getElementById("toDate").value;
+
+    if (!fromVal || !toVal) return;
+
+    filterData(new Date(fromVal), new Date(toVal));
+}
+
+function filterData(from, to) {
+    const filtered = rawData.filter(r => {
+        const d = parseDate(r.Date);
+        return d >= from && d <= to;
+    });
+
+    calculateTopStocks(filtered);
+}
+
+function calculateTopStocks(data) {
+    const map = {};
+
+    data.forEach(r => {
+        map[r.Symbol] = (map[r.Symbol] || 0) + r.net_value;
+    });
+
+    const entries = Object.entries(map);
+
+    const bought = entries
+        .filter(e => e[1] > 0)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 15);
+
+    const sold = entries
+        .filter(e => e[1] < 0)
+        .sort((a, b) => a[1] - b[1])
+        .slice(0, 15);
+
+    renderTable("boughtTable", bought, true);
+    renderTable("soldTable", sold, false);
+}
+
+function renderTable(id, rows, isBuy) {
+    const el = document.getElementById(id);
+    el.innerHTML = "";
+
+    rows.forEach(([symbol, value]) => {
+        el.innerHTML += `
+            <tr class="border-b border-gray-700">
+                <td class="py-2">${symbol}</td>
+                <td class="py-2 text-right ${isBuy ? 'text-green-400' : 'text-red-400'}">
+                    ₹ ${(Math.abs(value) / 1e7).toFixed(2)} Cr
+                </td>
+            </tr>`;
+    });
+}
+</script>
+
+{% endblock %}

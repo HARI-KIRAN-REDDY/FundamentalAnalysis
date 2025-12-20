@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}Bulk Deal Search{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-6">🔍 Bulk Deals Deep Search</h2>
+
+<!-- Search Controls -->
+<div class="bg-black bg-opacity-30 p-6 rounded-xl shadow-lg w-full max-w-5xl mb-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <select id="searchMode" class="input" onchange="runSearch()">
+            <option value="stock">Search by Stock</option>
+            <option value="client">Search by Client</option>
+        </select>
+
+        <input id="searchInput" class="input"
+               placeholder="Stock Code / Client Name"
+               value="VMM">
+
+        <!-- TIME FILTER -->
+        <select id="timeFilter" class="input" onchange="runSearch()">
+            <option value="6M" selected>Last 6 Months</option>
+            <option value="1W">1 Week</option>
+            <option value="1M">1 Month</option>
+            <option value="3M">3 Months</option>
+            <option value="1Y">1 Year</option>
+            <option value="ALL">All Data</option>
+        </select>
+
+        <button onclick="runSearch()"
+                class="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 rounded-lg">
+            Analyze
+        </button>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="w-full max-w-6xl mt-8 bg-black bg-opacity-30 rounded-xl p-6">
+    <h3 class="text-xl font-semibold mb-4" id="tableTitle"></h3>
+    <table class="w-full text-sm">
+        <thead class="border-b border-gray-500">
+            <tr>
+                <th>Date</th>
+                <th>Symbol</th>
+                <th>Client</th>
+                <th class="text-right">Qty</th>
+                <th class="text-right">Value (Cr)</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="resultTable"></tbody>
+    </table>
+</div>
+
+
+<!-- Charts -->
+<div id="chart2" class="w-full max-w-6xl mt-8"></div>
+<div id="chart1" class="w-full max-w-6xl mt-8"></div>
+
+
+
+<style>
+.input {
+    color: black;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+</style>
+
+<script>
+let rawData = [];
+
+fetch("/api/hist_bulk_deals")
+    .then(r => r.json())
+    .then(d => {
+        rawData = d;
+        runSearch();
+    });
+
+function applyTimeFilter(data) {
+    const filter = timeFilter.value;
+    if (filter === "ALL") return data;
+
+    const now = new Date();
+    const daysMap = {
+        "1W": 7,
+        "1M": 30,
+        "3M": 90,
+        "6M": 180,
+        "1Y": 365
+    };
+
+    const cutoff = new Date(now.setDate(now.getDate() - daysMap[filter]));
+    return data.filter(r => new Date(r.Date) >= cutoff);
+}
+
+function runSearch() {
+    const mode = searchMode.value;
+    const q = searchInput.value.toUpperCase().trim();
+    if (!q) return;
+
+    let data = rawData.filter(r =>
+        mode === "stock"
+            ? r.Symbol.toUpperCase().includes(q)
+            : r["Client Name"].toUpperCase().includes(q)
+    );
+
+    data = applyTimeFilter(data);
+
+    resetView();
+    mode === "stock" ? stockView(data, q) : clientView(data, q);
+    renderTable(data);
+}
+
+function resetView() {
+    chart1.innerHTML = "";
+    chart2.innerHTML = "";
+    resultTable.innerHTML = "";
+}
+/* ================= STOCK VIEW ================= */
+function stockView(data, stock) {
+    tableTitle.innerText = `📈 ${stock} — Institutional Activity`;
+
+    // Client-wise Net Value (bar)
+    const map = {};
+    data.forEach(r => {
+        map[r["Client Name"]] = (map[r["Client Name"]] || 0) + r.net_value;
+    });
+
+    Plotly.newPlot("chart1", [{
+        x: Object.values(map).map(v => v / 1e7), // ₹ Cr
+        y: Object.keys(map),
+        orientation: "h",
+        type: "bar",
+        marker: {
+            color: Object.values(map).map(v => v > 0 ? "#22c55e" : "#ef4444")
+        }
+    }], chartLayout("Client-wise Net Value (₹ Cr)", 300, 50));
+
+    // Accumulation / Distribution Trend by Quantity in Crores
+    const byDateQty = {};
+    data.forEach(r => {
+        byDateQty[r.Date] = (byDateQty[r.Date] || 0) + r.quantity_traded;
+    });
+
+    const dates = Object.keys(byDateQty).sort((a,b)=> new Date(a)-new Date(b));
+    const qtyCr = dates.map(d => byDateQty[d] / 1e7); // Convert to crores
+
+    Plotly.newPlot("chart2", [{
+            x: dates,
+            y: qtyCr,
+            type: "scatter",
+            mode: "lines+markers",
+            line: { color: "#60a5fa" },
+            name: "Net Quantity (Cr)"
+        }], {
+            title: "Accumulation / Distribution Trend (Quantity in Cr)",
+            font: { color: "white" },
+            margin: { t: 50, l: 100 },
+            paper_bgcolor: "rgba(0,0,0,0.6)",   // darker overall chart container
+            plot_bgcolor: "rgba(10,10,10,0.8)",  // dark background behind the data
+            xaxis: { color: "white" },
+            yaxis: { color: "white", title: "Quantity (Cr)" }
+        });
+
+}
+
+/* ================= CLIENT VIEW ================= */
+function clientView(data, client) {
+    tableTitle.innerText = `🧑 ${client} — Trading Footprint`;
+
+    const buy = {}, sell = {};
+    data.forEach(r => {
+        const tgt = r.net_value > 0 ? buy : sell;
+        tgt[r.Symbol] = (tgt[r.Symbol] || 0) + Math.abs(r.net_value);
+    });
+
+    Plotly.newPlot("chart1", [
+        { x: Object.keys(buy), y: Object.values(buy).map(v => v/1e7), name: "BUY", type: "bar" },
+        { x: Object.keys(sell), y: Object.values(sell).map(v => v/1e7), name: "SELL", type: "bar" }
+    ], {
+        ...chartLayout("Stock-wise Exposure (₹ Cr)"),
+        barmode: "stack"
+    });
+
+    // Trade Timeline Bubble Graph (bubble size = net_value in crores)
+    const bubbleData = [{
+        x: data.map(r => r.Date),
+        y: data.map(r => r.Symbol),
+        text: data.map(r => `${r["Client Name"]}<br>Qty: ${r.quantity_traded.toLocaleString()}<br>₹ ${(Math.abs(r.net_value)/1e7).toFixed(2)} Cr`),
+        mode: "markers",
+        marker: {
+            size: data.map(r => Math.max(Math.abs(r.net_value)/1e7, 1)), // Crores
+            color: data.map(r => r.action === "BUY" ? "#22c55e" : "#ef4444"),
+            sizemode: "area",
+            sizeref: 4.0
+        }
+    }];
+
+    Plotly.newPlot("chart2", bubbleData, {
+    ...chartLayout("Trade Timeline (Bubble = Value ₹ Cr)"),
+    paper_bgcolor: "rgba(0,0,0,0.6)",   // darker overall chart container
+    plot_bgcolor: "rgba(10,10,10,0.8)"  // dark background behind the bubbles
+});
+
+}
+
+/* ================= TABLE ================= */
+function renderTable(data) {
+    resultTable.innerHTML = "";
+    data.sort((a,b)=>new Date(a.Date)-new Date(b.Date)).forEach(r=>{
+        resultTable.innerHTML += `
+        <tr class="border-b border-gray-700">
+            <td>${r.Date}</td>
+            <td>${r.Symbol}</td>
+            <td>${r["Client Name"]}</td>
+            <td class="text-right">${r.quantity_traded.toLocaleString()}</td>
+            <td class="text-right">₹ ${(Math.abs(r.net_value)/1e7).toFixed(2)}</td>
+            <td class="${r.action==="BUY"?"text-green-400":"text-red-400"}">${r.action}</td>
+        </tr>`;
+    });
+}
+
+function chartLayout(title, leftMargin=100, topMargin=50){
+    return {
+        title,
+        paper_bgcolor:"rgba(0,0,0,0)",
+        plot_bgcolor:"rgba(0,0,0,0)",
+        font:{color:"white"},
+        margin:{t: topMargin, l: leftMargin}
+    };
+}
+
+</script>
+
+{% endblock %}
