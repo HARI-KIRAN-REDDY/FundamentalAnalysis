@@ -7,21 +7,20 @@
     <p class="text-lg mb-8">Plan. Invest. Prosper.</p>
 
 
-
-    <div class="w-full max-w-md flex flex-row gap-3">
-        {% include "buttons/fii_dii_button.html" %}
-        {% include "buttons/nifty_pe_pb_button.html" %}
-    </div>
-
-
-
     <!-- Search Box -->
     <div class="w-full max-w-md">
         {% include "forms/_search_form.html" %}
     </div>
+
+    <div class="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+        {% include "buttons/fii_dii_button.html" %}
+        {% include "buttons/nifty_pe_pb_button.html" %}
+        {% include "buttons/gold_nifty_ratio.html" %}
+        {% include "buttons/hist_bulk_button.html" %}
+    </div>
+
     <div><p>Stock screens are currently not available due to technical reasons</p>{% include "screen.html" %}</div>
     <div class="w-full overflow-hidden whitespace-nowrap my-4">
-        <div class="w-full max-w-md mx-auto flex flex-row gap-3">{% include "buttons/hist_bulk_button.html" %}</div>
     {% include "bulk_deals_scrolling.html" %}
     </div>
 

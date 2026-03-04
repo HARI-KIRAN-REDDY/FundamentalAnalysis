@@ -62,7 +62,7 @@ def display_data():
 
 @app.route('/login')
 def login():
-    return '<h1>login feature is still in development, please comeback later</h1>'
+    return render_template('login.html')
 
 
 @app.route('/time_period', methods=['POST'])
@@ -123,6 +123,10 @@ def hist_bulk_1():
 @app.route("/hist_bulk_search")
 def hist_bulk_search():
     return render_template("hist_bulk_search.html")
+
+@app.route("/gold-nifty-ratio")
+def gold_nifty_ratio():
+    return render_template("gold_nifty_ratio.html")
 
 
 

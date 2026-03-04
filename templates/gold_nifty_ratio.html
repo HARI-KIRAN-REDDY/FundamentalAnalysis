@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Gold–Nifty Ratio | Klick Pro{% endblock %}
+
+{% block content %}
+
+<div class="w-full max-w-6xl mx-auto text-left">
+
+    <!-- Header -->
+    <div class="mb-6">
+        <h1 class="text-4xl font-bold text-yellow-300">
+            Gold – Nifty Ratio
+        </h1>
+        <p class="text-sm text-yellow-400 mt-1">
+            PRO Macro Indicator · Equity vs Safe Haven Valuation
+        </p>
+    </div>
+
+    <!-- Insight Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-black/30 border border-yellow-500/30 rounded-xl p-4">
+            <p class="text-sm text-yellow-400">Current Ratio</p>
+            <p id="currentRatio" class="text-2xl font-bold text-white">—</p>
+        </div>
+
+        <div class="bg-black/30 border border-yellow-500/30 rounded-xl p-4">
+            <p class="text-sm text-yellow-400">Historical Mean</p>
+            <p id="meanRatio" class="text-2xl font-bold text-white">—</p>
+        </div>
+
+        <div class="bg-black/30 border border-yellow-500/30 rounded-xl p-4">
+            <p class="text-sm text-yellow-400">Valuation Insight</p>
+            <p id="valuationInsight" class="text-lg font-semibold">—</p>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-black/40 border border-yellow-500/20 rounded-xl p-4">
+        <div id="goldNiftyChart" class="w-full h-[480px]"></div>
+    </div>
+
+    <!-- Explanation -->
+    <div class="mt-6 bg-black/30 border border-yellow-500/20 rounded-xl p-5">
+        <h2 class="text-lg font-semibold text-yellow-300 mb-2">
+            How to Read This Indicator
+        </h2>
+        <ul class="list-disc list-inside text-sm text-gray-200 space-y-1">
+            <li><b>High Ratio</b> → Gold expensive vs Nifty (Equities may be undervalued)</li>
+            <li><b>Low Ratio</b> → Equities expensive vs Gold (Caution zone)</li>
+            <li>Historically useful for <b>long-term asset allocation</b></li>
+        </ul>
+    </div>
+
+</div>
+
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+<script>
+async function loadGoldNiftyRatio() {
+    const url = "https://raw.githubusercontent.com/HARI-KIRAN-REDDY/FIIDIIData/main/gold_nifty_ratio.csv";
+    const response = await fetch(url);
+    const csvText = await response.text();
+
+    const rows = csvText.trim().split("\n").slice(1);
+
+    let dates = [];
+    let ratios = [];
+
+    rows.forEach(row => {
+        const cols = row.split(",");
+        dates.push(new Date(cols[0]));
+        ratios.push(parseFloat(cols[3]));
+    });
+
+    // Stats
+    const currentRatio = ratios[ratios.length - 1];
+    const meanRatio = ratios.reduce((a, b) => a + b, 0) / ratios.length;
+    const stdDev = Math.sqrt(
+        ratios.map(x => Math.pow(x - meanRatio, 2)).reduce((a, b) => a + b) / ratios.length
+    );
+
+    // Valuation logic
+    let insight = "";
+    let insightColor = "text-white";
+
+    if (currentRatio > meanRatio + stdDev) {
+        insight = "Equities likely undervalued vs Gold";
+        insightColor = "text-green-400";
+    } else if (currentRatio < meanRatio - stdDev) {
+        insight = "Equities possibly overvalued";
+        insightColor = "text-red-400";
+    } else {
+        insight = "Fair valuation zone";
+        insightColor = "text-yellow-300";
+    }
+
+    document.getElementById("currentRatio").innerText = currentRatio.toFixed(2);
+    document.getElementById("meanRatio").innerText = meanRatio.toFixed(2);
+    const insightEl = document.getElementById("valuationInsight");
+    insightEl.innerText = insight;
+    insightEl.classList.add(insightColor);
+
+    // Plot
+    const trace = {
+        x: dates,
+        y: ratios,
+        type: "scatter",
+        mode: "lines",
+        line: {
+            color: "#facc15",
+            width: 2
+        },
+        name: "Gold–Nifty Ratio"
+    };
+
+    const meanLine = {
+        x: dates,
+        y: Array(dates.length).fill(meanRatio),
+        type: "scatter",
+        mode: "lines",
+        line: {
+            dash: "dash",
+            color: "#ffffff"
+        },
+        name: "Historical Mean"
+    };
+
+    const layout = {
+        paper_bgcolor: "rgba(0,0,0,0)",
+        plot_bgcolor: "rgba(0,0,0,0)",
+        font: { color: "#ffffff" },
+        xaxis: { title: "Year" },
+        yaxis: { title: "Gold–Nifty Ratio" },
+        legend: { orientation: "h" }
+    };
+
+    Plotly.newPlot("goldNiftyChart", [trace, meanLine], layout, {responsive: true});
+}
+
+loadGoldNiftyRatio();
+</script>
+
+{% endblock %}
