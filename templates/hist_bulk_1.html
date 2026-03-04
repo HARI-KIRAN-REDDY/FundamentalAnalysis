@@ -118,6 +118,7 @@ function parseDate(d) {
 
 function applyPreset(type, btn) {
     const now = new Date();
+    now.setHours(23, 59, 59, 999);
     let from = new Date();
 
     if (type === '7d') from.setDate(now.getDate() - 7);
@@ -140,7 +141,13 @@ function applyCustom() {
 
     if (!fromVal || !toVal) return;
 
-    filterData(new Date(fromVal), new Date(toVal));
+    const from = new Date(fromVal);
+    from.setHours(0, 0, 0, 0);
+
+    const to = new Date(toVal);
+    to.setHours(23, 59, 59, 999);
+
+    filterData(from, to);
 }
 
 function filterData(from, to) {

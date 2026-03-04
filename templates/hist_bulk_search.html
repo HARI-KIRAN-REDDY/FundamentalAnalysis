@@ -82,6 +82,8 @@ function applyTimeFilter(data) {
     if (filter === "ALL") return data;
 
     const now = new Date();
+    now.setHours(23, 59, 59, 999); // ✅ include full today
+
     const daysMap = {
         "1W": 7,
         "1M": 30,
@@ -90,7 +92,10 @@ function applyTimeFilter(data) {
         "1Y": 365
     };
 
-    const cutoff = new Date(now.setDate(now.getDate() - daysMap[filter]));
+    const cutoff = new Date(now);
+    cutoff.setDate(cutoff.getDate() - daysMap[filter]);
+    cutoff.setHours(0, 0, 0, 0); // ✅ start of cutoff day
+
     return data.filter(r => new Date(r.Date) >= cutoff);
 }
 
